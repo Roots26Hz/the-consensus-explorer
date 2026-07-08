@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="A keynote presentation comparing blockchain consensus algorithms — the trilemma, real-world chains, smart-contract languages, layers and cross-chain compatibility."
+    />
+    <title>Consensus Algorithms in Blockchain — A Comparative Explorer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas id="bgCanvas" aria-hidden="true"></canvas>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <!-- ============================== DECK ============================== -->
+    <main class="deck" id="deck" aria-roledescription="presentation">
+      <!-- 1 · Title -->
+      <section class="slide slide-title is-active" data-accent="#8899ff">
+        <div class="slide-inner center">
+          <p class="kicker" data-anim>Blockchain · Distributed Consensus</p>
+          <h1 class="title-xl" data-anim>
+            Consensus Algorithms<span class="title-line">in Blockchain</span>
+          </h1>
+          <p class="title-sub" data-anim>A Comparative Explorer</p>
+          <p class="title-hint" data-anim>
+            Use <kbd>←</kbd> <kbd>→</kbd> to move · click any diagram to zoom
+          </p>
+        </div>
+      </section>
+
+      <!-- 2 · Why consensus -->
+      <section class="slide slide-statement" data-accent="#8899ff">
+        <div class="slide-inner">
+          <p class="eyebrow" data-anim>The problem</p>
+          <h2 class="statement" data-anim>
+            How does a network of strangers
+            <span class="accent-word">agree on the truth</span>
+            with no one in charge?
+          </h2>
+          <p class="statement-note" data-anim>
+            A consensus algorithm is the mechanism that lets a decentralised network
+            validate transactions, prevent double-spending and stay in sync — without
+            trusting any single party.
+          </p>
+        </div>
+      </section>
+
+      <!-- 3 · Trilemma -->
+      <section class="slide slide-split" data-accent="#8899ff" data-build="triangle">
+        <div class="slide-inner split">
+          <div class="split-copy">
+            <p class="eyebrow" data-anim>The framework</p>
+            <h2 class="h-lg" data-anim>The Blockchain Trilemma</h2>
+            <p class="lead" data-anim>
+              Every consensus design spends a fixed budget across three pillars.
+              Optimise for two, and the third gives ground.
+            </p>
+            <ul class="pillar-list" data-anim>
+              <li><b>Scalability</b> — throughput &amp; block speed (TPS).</li>
+              <li><b>Security</b> — resistance to 51% &amp; Sybil attacks.</li>
+              <li><b>Decentralisation</b> — how open node participation is.</li>
+            </ul>
+          </div>
+          <figure class="split-figure">
+            <div class="zoomable" data-zoom="triangle" id="triHolder" tabindex="0" aria-label="Zoom the trilemma diagram"></div>
+            <figcaption class="zoom-hint" data-anim>Click to zoom</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 4 · Layer 1 vs Layer 2 -->
+      <section class="slide slide-layers" data-accent="#8899ff">
+        <div class="slide-inner">
+          <p class="eyebrow center-x" data-anim>Where a chain lives</p>
+          <h2 class="h-lg center-x" data-anim>Layer 1 vs Layer 2</h2>
+          <div class="layer-two">
+            <div class="layer-card l1" data-anim>
+              <span class="layer-badge">Layer 1</span>
+              <h3>The base chain</h3>
+              <p>Runs the consensus algorithm itself. Produces and finalises blocks — the ultimate source of security and truth.</p>
+              <p class="layer-eg">Bitcoin · Ethereum · Solana · Cardano</p>
+            </div>
+            <div class="layer-link" aria-hidden="true">
+              <span>settles down to ▾</span>
+              <span>built on top ▴</span>
+            </div>
+            <div class="layer-card l2" data-anim>
+              <span class="layer-badge l2b">Layer 2</span>
+              <h3>The scaling layer</h3>
+              <p>Built on top to add speed and cut fees, then settles back to L1 to inherit its security.</p>
+              <p class="layer-eg">Lightning · Arbitrum · Optimism · Base</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 · The nine mechanisms (agenda) -->
+      <section class="slide slide-agenda" data-accent="#8899ff" data-build="agenda">
+        <div class="slide-inner">
+          <p class="eyebrow center-x" data-anim>Nine ways to agree</p>
+          <h2 class="h-lg center-x" data-anim>The mechanisms</h2>
+          <ol class="agenda-grid" id="agendaGrid" data-anim></ol>
+        </div>
+      </section>
+
+      <!-- 6–14 · Algorithm slides injected here -->
+      <!-- 15 · Matrix -->
+      <section class="slide slide-matrix" data-accent="#8899ff" data-build="matrix">
+        <div class="slide-inner">
+          <p class="eyebrow center-x" data-anim>Cross-chain interoperability</p>
+          <h2 class="h-lg center-x" data-anim>Compatibility matrix</h2>
+          <p class="lead center-x narrow" data-anim>
+            Two chains are compatible at the protocol level when they share a consensus
+            mechanism. Click to zoom · hover any cell.
+          </p>
+          <figure class="matrix-figure" data-anim>
+            <div class="zoomable" data-zoom="matrix" id="matrixHolder" tabindex="0" aria-label="Zoom the compatibility matrix"></div>
+            <div class="matrix-tooltip" id="matrixTip" aria-live="polite"></div>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 16 · Closing -->
+      <section class="slide slide-statement slide-closing" data-accent="#8899ff">
+        <div class="slide-inner center">
+          <p class="eyebrow" data-anim>In one line</p>
+          <h2 class="statement" data-anim>
+            Different rules, one goal —
+            <span class="accent-word">trustless consensus.</span>
+          </h2>
+          <p class="statement-note" data-anim>
+            Consensus Algorithms in Blockchain · A Comparative Explorer. A theoretical tool
+            for understanding how distributed systems agree without a middleman. Metrics are
+            representative approximations for comparison.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============================ CHROME ============================= -->
+    <button class="nav-arrow nav-prev" id="navPrev" aria-label="Previous slide">
+      <svg viewBox="0 0 24 24" width="26" height="26"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="nav-arrow nav-next" id="navNext" aria-label="Next slide">
+      <svg viewBox="0 0 24 24" width="26" height="26"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <div class="counter" id="counter" aria-hidden="true">01 / 16</div>
+    <nav class="dots" id="dots" aria-label="Slide navigation"></nav>
+    <div class="progress-line" aria-hidden="true"><span id="progressBar"></span></div>
+
+    <!-- ============================ LIGHTBOX =========================== -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Zoomed diagram" hidden>
+      <button class="lightbox-close" id="lightboxClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <div class="lightbox-stage" id="lightboxStage"></div>
+      <div class="matrix-tooltip lightbox-tip" id="lightboxTip" aria-live="polite"></div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="charts.js"></script>
+    <script src="background.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
