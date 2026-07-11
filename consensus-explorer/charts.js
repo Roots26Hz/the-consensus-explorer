@@ -294,6 +294,69 @@ function buildTrilemmaTriangle(opts = {}) {
   return svg;
 }
 
+/* -------------------------------------------------------------------------
+   Multi-polygon radar — overlays several algorithms' trilemma fingerprints
+   on one grid for the compare view. `list` = [{trilemma, accent, label}].
+   ---------------------------------------------------------------------- */
+function buildRadarMulti(list, opts = {}) {
+  const size = opts.size || 380;
+  const cx = size / 2;
+  const cy = size / 2;
+  const R = size * 0.34;
+  const rings = 5;
+
+  const svg = el("svg", {
+    viewBox: `0 0 ${size} ${size}`,
+    class: "radar radar-multi",
+    role: "img",
+    "aria-label": `Trilemma comparison of ${list.map((l) => l.label).join(", ")}`,
+  });
+  const g = el("g");
+  svg.appendChild(g);
+
+  for (let r = 1; r <= rings; r++) {
+    const pts = AXES.map((_, i) => {
+      const p = polar(cx, cy, R, i, AXES.length, r / rings);
+      return `${p.x},${p.y}`;
+    }).join(" ");
+    g.appendChild(el("polygon", { points: pts, class: "radar-ring" }));
+  }
+  AXES.forEach((axis, i) => {
+    const p = polar(cx, cy, R, i, AXES.length, 1);
+    g.appendChild(el("line", { x1: cx, y1: cy, x2: p.x, y2: p.y, class: "radar-spoke" }));
+    const lp = polar(cx, cy, R + size * 0.085, i, AXES.length, 1);
+    const label = el("text", {
+      x: lp.x, y: lp.y, class: "radar-label",
+      "text-anchor": i === 0 ? "middle" : lp.x < cx ? "end" : "start",
+      "dominant-baseline": "middle",
+    });
+    label.textContent = axis.label;
+    g.appendChild(label);
+  });
+
+  list.forEach((item, li) => {
+    const pts = AXES.map((axis, i) =>
+      polar(cx, cy, R, i, AXES.length, item.trilemma[axis.key] / 10)
+    );
+    const poly = el("polygon", {
+      points: pts.map((p) => `${p.x},${p.y}`).join(" "),
+      class: "radar-area radar-area-multi",
+      style: `--accent:${item.accent}`,
+    });
+    if (!prefersReducedMotion()) {
+      poly.classList.add("radar-anim");
+      poly.style.transformOrigin = `${cx}px ${cy}px`;
+      poly.style.animationDelay = `${li * 120}ms`;
+    }
+    g.appendChild(poly);
+    pts.forEach((p) => {
+      g.appendChild(el("circle", { cx: p.x, cy: p.y, r: 3.4, class: "radar-dot", style: `--accent:${item.accent}` }));
+    });
+  });
+
+  return svg;
+}
+
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -303,5 +366,6 @@ if (typeof window !== "undefined") {
   window.buildMiniRadar = buildMiniRadar;
   window.buildHeatmap = buildHeatmap;
   window.buildTrilemmaTriangle = buildTrilemmaTriangle;
+  window.buildRadarMulti = buildRadarMulti;
   window.prefersReducedMotion = prefersReducedMotion;
 }

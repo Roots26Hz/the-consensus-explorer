@@ -10,7 +10,7 @@ const reduce = () => prefersReducedMotion();
 /* ----------------------- inject algorithm slides ----------------------- */
 function buildAlgoSlides() {
   const deck = $("#deck");
-  const matrixSlide = $(".slide-matrix");
+  const anchorSlide = $(".slide-compare") || $(".slide-matrix");
 
   ALGORITHMS.forEach((a, i) => {
     const s = document.createElement("section");
@@ -50,10 +50,20 @@ function buildAlgoSlides() {
             <h2 class="algo-title" data-anim>${a.name}</h2>
             <p class="algo-tag" data-anim>${a.tagline}</p>
             <p class="algo-mech" data-anim>${a.mechanism}</p>
+            <div class="algo-meta" data-anim>
+              <span class="meta-chip"><i>Category</i>${a.meta.category}</span>
+              <span class="meta-chip"><i>Sybil resistance</i>${a.meta.sybil}</span>
+              <span class="meta-chip"><i>Fault model</i>${a.meta.faultModel}</span>
+              <span class="meta-chip"><i>Finality</i>${a.meta.finality}</span>
+            </div>
             <div class="algo-security" data-anim>
               <div><span class="cap">51% attack</span><p>${a.security.attack51}</p></div>
               <div><span class="cap">Sybil</span><p>${a.security.sybil}</p></div>
             </div>
+            <button class="dive-btn" data-anim data-algo="${a.id}" type="button">
+              Explore in depth
+              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
           </div>
           <div class="algo-right" data-anim>
             <div class="zoomable" data-zoom="radar" data-algo="${a.id}" tabindex="0"
@@ -68,7 +78,7 @@ function buildAlgoSlides() {
         <div class="algo-facts" data-anim>${facts}</div>
       </div>`;
 
-    deck.insertBefore(s, matrixSlide);
+    deck.insertBefore(s, anchorSlide);
   });
 }
 
@@ -108,6 +118,31 @@ function buildSlide(slide) {
     const a = getAlgo(slide.dataset.algo);
     const holder = slide.querySelector(".zoomable[data-zoom='radar']");
     holder.appendChild(buildRadar(a.trilemma, a.accent, { size: 300 }));
+  } else if (kind === "compare") {
+    const table = $("#compareTable");
+    table.innerHTML = `
+      <thead><tr>
+        <th>Mechanism</th><th>Model</th><th>Sybil resource</th>
+        <th>Finality</th><th>~TPS</th><th>Energy</th>
+      </tr></thead>
+      <tbody>${ALGORITHMS.map((a) => `
+        <tr data-algo="${a.id}" tabindex="0">
+          <td class="ct-mech"><span class="ct-dot" style="background:${a.accent}"></span>${a.acronym}</td>
+          <td>${a.meta.category.split(" · ")[0]}</td>
+          <td>${a.meta.sybil}</td>
+          <td>${a.meta.finality}</td>
+          <td class="ct-num">${a.metrics.tps}</td>
+          <td>${a.metrics.energy}</td>
+        </tr>`).join("")}</tbody>`;
+    table.addEventListener("click", (e) => {
+      const row = e.target.closest("tr[data-algo]");
+      if (row) goTo(slideIndexOfAlgo(row.dataset.algo));
+    });
+    table.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      const row = e.target.closest("tr[data-algo]");
+      if (row) goTo(slideIndexOfAlgo(row.dataset.algo));
+    });
   } else if (kind === "matrix") {
     renderMatrix($("#matrixHolder"), $("#matrixTip"));
   }
@@ -144,8 +179,14 @@ function playAnims(slide) {
     el.classList.remove("play");
     el.style.transitionDelay = "";
   });
-  if (reduce()) {
-    items.forEach((el) => el.classList.add("play"));
+  if (reduce() || document.hidden) {
+    // hidden tabs freeze the CSS transition clock — show content instantly
+    items.forEach((el) => {
+      el.style.transition = "none";
+      el.classList.add("play");
+      void el.offsetWidth;
+      el.style.transition = "";
+    });
     return;
   }
   // small timeout (not rAF, which pauses when the tab is backgrounded) so the
@@ -292,12 +333,110 @@ function initZoom() {
   });
 }
 
+/* ------------------------------ deep dive ------------------------------ */
+const dd = $("#deepdive");
+const ddStage = $("#deepdiveStage");
+let ddOpen = false;
+let ddLastFocus = null;
+
+function openDive(algoId) {
+  const a = getAlgo(algoId);
+  if (!a || !a.detail) return;
+  const i = ALGORITHMS.indexOf(a);
+  const d = a.detail;
+
+  ddStage.innerHTML = `
+    <div class="dd-head">
+      <span class="algo-index">${String(i + 1).padStart(2, "0")}</span>
+      <span class="algo-chip">${a.acronym}</span>
+      <div class="dd-title">
+        <h2>${a.name}</h2>
+        <p>${a.tagline}</p>
+      </div>
+    </div>
+    <div class="algo-meta dd-meta">
+      <span class="meta-chip"><i>Category</i>${a.meta.category}</span>
+      <span class="meta-chip"><i>Sybil resistance</i>${a.meta.sybil}</span>
+      <span class="meta-chip"><i>Fault model</i>${a.meta.faultModel}</span>
+      <span class="meta-chip"><i>Finality</i>${a.meta.finality}</span>
+    </div>
+
+    <h3 class="dd-lbl">How it works</h3>
+    ${d.how.map((p) => `<p class="dd-para">${p}</p>`).join("")}
+
+    <h3 class="dd-lbl">Phases</h3>
+    <ol class="dd-phases">
+      ${d.phases.map((ph, k) => `
+        <li class="dd-phase">
+          <span class="dd-phase-idx">${String(k + 1).padStart(2, "0")}</span>
+          <span class="dd-phase-body"><strong>${ph.t}</strong><span>${ph.d}</span></span>
+        </li>`).join("")}
+    </ol>
+
+    <h3 class="dd-lbl">States &amp; transitions</h3>
+    <span class="dd-states-label">${d.states.label}</span>
+    <div class="dd-state-flow">
+      ${d.states.flow.map((s) => `<span class="dd-state-chip">${s}</span>`).join('<span class="dd-state-arrow" aria-hidden="true">→</span>')}
+    </div>
+
+    <h3 class="dd-lbl">Security &amp; attack surface</h3>
+    <ul class="dd-attacks">
+      ${d.attacks.map((at) => `<li><strong>${at.t}.</strong> ${at.d}</li>`).join("")}
+    </ul>
+
+    <div class="dd-notes">
+      <span class="dd-notes-lbl">Worth knowing</span>
+      ${d.notes.map((n) => `<p>${n}</p>`).join("")}
+    </div>
+  `;
+
+  document.documentElement.style.setProperty("--accent", a.accent);
+  ddLastFocus = document.activeElement;
+  dd.hidden = false;
+  dd.scrollTop = 0;
+  setTimeout(() => dd.classList.add("show"), 10);
+  ddOpen = true;
+  if (window.Background) window.Background.pause();
+  $("#deepdiveClose").focus();
+}
+
+function closeDive() {
+  if (!ddOpen) return;
+  dd.classList.remove("show");
+  ddOpen = false;
+  if (window.Background) window.Background.resume();
+  setTimeout(() => {
+    dd.hidden = true;
+    ddStage.innerHTML = "";
+  }, 350);
+  document.documentElement.style.setProperty(
+    "--accent",
+    slides[current].dataset.accent || "#8899ff"
+  );
+  if (ddLastFocus) ddLastFocus.focus();
+}
+
+function initDive() {
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest(".dive-btn");
+    if (b && !ddOpen && !lbOpen) openDive(b.dataset.algo);
+  });
+  $("#deepdiveClose").addEventListener("click", closeDive);
+  dd.addEventListener("click", (e) => {
+    if (e.target === dd) closeDive();
+  });
+}
+
 /* -------------------------------- input -------------------------------- */
 function initInput() {
   window.addEventListener("keydown", (e) => {
     if (lbOpen) {
       if (e.key === "Escape") closeZoom();
       return;
+    }
+    if (ddOpen) {
+      if (e.key === "Escape") closeDive();
+      return; // deck keys suspended while the deep dive is open
     }
     switch (e.key) {
       case "ArrowRight":
@@ -355,6 +494,7 @@ function init() {
   buildDots();
   initInput();
   initZoom();
+  initDive();
 
   const start = parseInt(location.hash.slice(1), 10);
   const idx = !isNaN(start) ? start - 1 : 0;
