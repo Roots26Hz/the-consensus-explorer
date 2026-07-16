@@ -34,13 +34,18 @@ function polar(cx, cy, R, i, total, frac) {
 function buildRadar(trilemma, accent, opts = {}) {
   const size = opts.size || 340;
   const animate = opts.animate !== false;
+  const showLabels = opts.labels !== false;
   const cx = size / 2;
   const cy = size / 2;
   const R = size * 0.34;
   const rings = 5;
+  // side margins so axis labels ("Decentralisation" etc.) render INSIDE the
+  // viewBox instead of overflowing their container
+  const padX = showLabels ? 92 : 4;
+  const padY = showLabels ? 12 : 4;
 
   const svg = el("svg", {
-    viewBox: `0 0 ${size} ${size}`,
+    viewBox: `${-padX} ${-padY} ${size + padX * 2} ${size + padY * 2}`,
     class: "radar",
     role: "img",
     "aria-label": `Trilemma radar: scalability ${trilemma.scalability}, security ${trilemma.security}, decentralisation ${trilemma.decentralization} out of 10`,
@@ -70,6 +75,7 @@ function buildRadar(trilemma, accent, opts = {}) {
     g.appendChild(
       el("line", { x1: cx, y1: cy, x2: p.x, y2: p.y, class: "radar-spoke" })
     );
+    if (!showLabels) return;
     const lp = polar(cx, cy, R + size * 0.085, i, AXES.length, 1);
     const label = el("text", {
       x: lp.x,
@@ -251,8 +257,10 @@ function buildTrilemmaTriangle(opts = {}) {
     return { ...v, x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R };
   });
 
+  // side margins keep the corner labels ("Decentralisation" / "Scalability",
+  // anchored outward) inside the viewBox rather than spilling out of the figure
   const svg = el("svg", {
-    viewBox: `0 0 ${w} ${h}`,
+    viewBox: `-78 -6 ${w + 156} ${h + 30}`,
     class: "triangle",
     role: "img",
     "aria-label": "The blockchain trilemma: scalability, security, decentralisation — a chain optimises for two",
@@ -306,7 +314,7 @@ function buildRadarMulti(list, opts = {}) {
   const rings = 5;
 
   const svg = el("svg", {
-    viewBox: `0 0 ${size} ${size}`,
+    viewBox: `-92 -12 ${size + 184} ${size + 24}`,
     class: "radar radar-multi",
     role: "img",
     "aria-label": `Trilemma comparison of ${list.map((l) => l.label).join(", ")}`,

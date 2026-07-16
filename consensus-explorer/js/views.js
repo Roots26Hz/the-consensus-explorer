@@ -24,6 +24,13 @@ const ICONS = {
 const icon = (id) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">${ICONS[id] || ""}</svg>`;
 
+/* Compact finality labels so card metric rows never wrap. */
+const FINALITY_SHORT = {
+  pow: "Probabilistic", pos: "Deterministic", dpos: "Sub-second",
+  pbft: "Immediate", poa: "Near-immediate", poh: "Fast → rooted",
+  poet: "Configurable", poc: "Probabilistic", pob: "Base-dependent",
+};
+
 const metaChips = (a) => `
   <div class="meta-row">
     <span class="meta-chip"><i>Category</i>${a.meta.category}</span>
@@ -107,7 +114,7 @@ export function renderHome(el) {
           <div class="ac-metric"><i>TPS</i><b>${a.metrics.tps}</b></div>
           <div class="ac-metric"><i>Block</i><b>${a.metrics.blockTime}</b></div>
           <div class="ac-metric"><i>Energy</i><b>${a.metrics.energy}</b></div>
-          <div class="ac-metric"><i>Finality</i><b>${a.meta.finality.split(" (")[0].split(" —")[0]}</b></div>
+          <div class="ac-metric"><i>Finality</i><b>${FINALITY_SHORT[a.id]}</b></div>
         </div>
       </div>
       <div class="ac-foot">
@@ -115,7 +122,7 @@ export function renderHome(el) {
         <span class="go">Simulate →</span>
       </div>`;
     card.querySelector(".ac-radar").appendChild(
-      window.buildRadar(a.trilemma, a.accent, { size: 130, animate: false })
+      window.buildRadar(a.trilemma, a.accent, { size: 130, animate: false, labels: false })
     );
     grid.appendChild(card);
   });
